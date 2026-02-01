@@ -10,7 +10,7 @@
 ├── start.bat           # Windows 启动脚本（生产模式）
 ├── start_dev.bat       # Windows 启动脚本（开发模式）
 ├── static/             # 静态资源目录
-│   └── zhongchou.png   # 顶部图片（需自行添加）
+│   └── meishaonv.png   # 顶部图片（需自行添加）
 ├── downloads/          # 临时下载目录（自动创建）
 └── zips/               # ZIP 打包目录（自动创建）
 ```
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. 添加静态资源
-将 `zhongchou.png` 图片放入 `static/` 目录。
+将 `meishaonv.png` 图片放入 `static/` 目录。
 
 ### 4. 启动服务
 - **生产模式**：双击 `start.bat`
