@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>试试我试试好-视频下载工具Web 1.0</title>
+
+<style>
+/* ========== 高级动态背景 + 动画 ========== */
+body{
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: bgAnimate 12s ease infinite;
+  color:#e5e7eb;
+  padding:20px;
+  margin:0;
+  min-height: 100vh;
+}
+@keyframes bgAnimate {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(51, 65, 85, 0.3);
+}
+h1{
+  text-align:center;
+  margin-bottom: 8px;
+  text-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+}
+.subtitle{
+  text-align:center;
+  color:#94a3b8;
+  font-size:16px;
+  font-weight:normal;
+  margin-top:0;
+  margin-bottom:20px;
+}
+textarea{
+  width:100%;
+  height:140px;
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #334155;
+  padding:10px;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.3s;
+  box-sizing: border-box;
+}
+textarea:focus{
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+}
+button{
+  background:#2563eb;
+  border:none;
+  padding:8px 14px;
+  color:white;
+  margin:4px;
+  cursor:pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+button:hover{
+  background:#1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+button:active{
+  transform: translateY(0);
+}
+button.secondary{
+  background:#475569;
+}
+button.secondary:hover{
+  background:#334155;
+}
+button.danger{
+  background:#b91c1c;
+}
+button.danger:hover{
+  background:#991b1b;
+}
+.panel{
+  margin-top:20px;
+  padding:12px;
+  border:1px solid #334155;
+  border-radius:6px;
+  background: rgba(2, 6, 23, 0.6);
+}
+.video-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.video-item{
+  width:50px;
+  text-align:center;
+  padding:6px 0;
+  background:#020617;
+  border:1px solid #334155;
+  cursor:pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.video-item:hover{
+  border-color: #2563eb;
+}
+.video-item.checked{
+  background:#2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+#log{
+  height:200px;
+  overflow:auto;
+  background:#020617;
+  padding:8px;
+  font-size:13px;
+  border-radius: 4px;
+}
+input[type=text]{
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #334155;
+  padding:4px 8px;
+  border-radius: 4px;
+  outline: none;
+}
+input[type=text]:focus{
+  border-color: #2563eb;
+}
+input[type=checkbox]{
+  accent-color: #2563eb;
+}
+
+/* ================= 免责声明遮罩 ================= */
+#disclaimerMask{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,0.98);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(8px);
+}
+#disclaimerBox{
+  width:600px;
+  max-width:90%;
+  background:#020617;
+  border:1px solid #334155;
+  border-radius:10px;
+  padding:20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+#disclaimerBox h2{
+  margin-top:0;
+  text-align:center;
+}
+#disclaimerContent{
+  font-size:14px;
+  line-height:1.6;
+  max-height:260px;
+  overflow:auto;
+  margin:15px 0;
+  color:#cbd5f5;
+}
+#disclaimerActions{
+  text-align:center;
+}
+#disclaimerActions button{
+  width:160px;
+  margin:0 10px;
+}
+
+/* 新增：图片样式，可根据需要调整 */
+.footer-img {
+  margin-bottom: 30px; /* 调整为底部间距，适配顶部位置 */
+  text-align: center;
+}
+.footer-img img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============ 免责声明遮罩 ============ -->
+<div id="disclaimerMask" style="display:flex;">
+  <div id="disclaimerBox">
+    <h2>免责声明</h2>
+    <div id="disclaimerContent">
+      <p>在使用本网站提供的服务前，请您务必仔细阅读并充分理解本免责声明内容。</p>
+      <p>1. 本网站仅作为技术研究、学习与测试用途，所提供的解析与下载功能不针对任何特定平台。</p>
+      <p>2. 用户应确保其获取、使用、下载的内容不侵犯任何第三方的合法权益，包括但不限于著作权、隐私权及其他合法权利。</p>
+      <p>3. 因用户使用本工具所产生的任何法律责任、纠纷或损失，均由用户本人自行承担，与本网站及开发者无关。</p>
+      <p>4. 本网站不对下载内容的合法性、完整性、准确性或可用性作出任何形式的保证。</p>
+      <p>5. 一旦点击"同意并继续"，即视为您已阅读、理解并同意本免责声明的全部内容。</p>
+    </div>
+    <div id="disclaimerActions">
+      <button class="secondary" onclick="declineDisclaimer()">不同意</button>
+      <button onclick="acceptDisclaimer()">同意并继续</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 图片移到最上方 -->
+  <div class="footer-img">
+    <img src="/static/meishaonv.png" alt="顶部图片">
+  </div>
+
+  <!-- 原标题已删除 -->
+  <textarea id="inputContent" placeholder="按F12打开发者工具面板，点击<元素>标签，找到<body class=>这一行，右键<复制>，<复制OuterHTML>，然后将内容粘贴到此处。"></textarea>
+  <br>
+  <button id="parseBtn" onclick="parseLinks()">解析内容</button>
+  <button onclick="getInviteCode()">获取邀请码</button>
+  <button onclick="openTutorial()">使用教程</button>
+
+  <div class="panel">
+    <b>视频列表</b><br>
+    <button class="secondary" onclick="selectAll()">全选</button>
+    <button class="secondary" onclick="clearAll()">取消全选</button>
+    <div class="video-list" id="list"></div>
+  </div>
+
+  <div class="panel">
+    <b>下载设置</b><br>
+
+    <div style="font-size:14px; color:#94a3b8; margin:8px 0;">
+      说明：视频将由服务器后台代码按顺序重命名后，自动打包为一个压缩文件（ZIP）供您下载。<br>
+      视频数量较多时，请耐心等待打包完成。如果提示"请求异常"可以再次点击"开始下载"
+    </div>
+
+    <button id="downloadBtn" onclick="startDownload()">
+      开始下载
+    </button>
+  </div>
+
+  <div class="panel">
+    <b>运行日志</b>
+    <div id="log"></div>
+  </div>
+
+</div>
+
+<script>
+let videoUrls = [];
+let selected = [];
+let customNames = {};
+
+/* ========== 免责声明逻辑（刷新必现，无缓存） ========== */
+function acceptDisclaimer(){
+  document.getElementById("disclaimerMask").style.display = "none";
+}
+
+function declineDisclaimer(){
+  alert("您必须同意免责声明后才能使用本网站。");
+}
+
+function openTutorial() {
+  // 打开新标签页跳转至教程链接
+  window.open("https://www.bilibili.com/video/BV1Kk6ZB3EG8", "_blank");
+  log("📚 已为您打开使用教程页面");
+}
+
+/* ========== 原有功能代码 ========== */
+function log(msg){
+  const el = document.getElementById("log");
+  el.innerHTML += msg + "<br>";
+  el.scrollTop = el.scrollHeight;
+}
+
+function parseLinks(){
+  const btn = document.getElementById("parseBtn");
+  if(!btn){
+    console.error("parseBtn 不存在");
+    return;
+  }
+
+  const content = inputContent.value.trim();
+  if(!content){
+    log("⚠ 输入为空");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "正在解析中...";
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+
+  fetch("/api/parse",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ content })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.code !== 200){
+      log("❌ 解析失败");
+      restore();
+      return;
+    }
+
+    videoUrls = d.data.video_urls || [];
+    renderList();
+    log(`✔ 解析完成，共 ${videoUrls.length} 个视频`);
+    inputContent.value = "";
+    restore();
+  })
+  .catch(e=>{
+    log("❌ 解析异常：" + e.message);
+    restore();
+  });
+
+  function restore(){
+    btn.disabled = false;
+    btn.innerText = "解析内容";
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+  }
+}
+
+// 修复核心：视频列表渲染+索引映射
+function renderList(){
+  list.innerHTML="";
+  selected=[];
+  customNames={}; // 清空名称映射
+
+  videoUrls.forEach((u,i)=>{
+    const idx=i+1; // 视频序号（1开始，用于显示）
+    const div=document.createElement("div");
+    div.className="video-item";
+    div.innerText=idx.toString().padStart(2,"0");
+    div.dataset.index = i; // 存储原始索引（0开始），关键！
+    div.onclick=()=>{
+      div.classList.toggle("checked");
+      const rawIndex = parseInt(div.dataset.index); // 获取原始索引
+      if(div.classList.contains("checked")){
+        // 选中时：selected存储原始索引（0开始）
+        selected.push(rawIndex);
+        customNames[rawIndex] = "视频" + idx; // 名称按显示序号命名，键为原始索引
+      }else{
+        // 取消选中时：删除对应原始索引
+        selected = selected.filter(v=>v!==rawIndex);
+        delete customNames[rawIndex];
+      }
+    }
+    list.appendChild(div);
+  });
+}
+
+// 修复全选逻辑
+function selectAll(){
+  document.querySelectorAll(".video-item").forEach(d=>{
+    if(!d.classList.contains("checked")) d.click();
+  });
+}
+
+// 修复取消全选逻辑
+function clearAll(){
+  document.querySelectorAll(".video-item.checked").forEach(d=>{
+    d.classList.remove("checked");
+  });
+  selected=[];
+  customNames={};
+}
+
+// 修复核心：下载请求参数组装
+function startDownload(){
+  if(selected.length === 0){
+    log("⚠ 未选择视频");
+    return;
+  }
+
+  const btn = document.getElementById("downloadBtn");
+
+  // 禁用按钮
+  btn.disabled = true;
+  btn.innerText = "处理中，请稍候...";
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+
+  log("📥 已选择下载视频：");
+
+  const downloadLinks = [];
+  const downloadNames = {};
+
+  selected.forEach((rawIndex, idx) => {
+    const videoNo = rawIndex + 1;
+    const videoUrl = videoUrls[rawIndex];
+
+    downloadLinks.push(videoUrl);
+    downloadNames[idx] = customNames[rawIndex] || ("视频" + videoNo);
+
+    log("→ 视频 " + videoNo.toString().padStart(2, "0"));
+  });
+
+  fetch("/api/download", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      selected_links: downloadLinks,
+      custom_names: downloadNames
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if(d.code !== 200){
+      log("❌ 下载任务失败");
+      restoreButton();
+      return;
+    }
+
+    if(d.data && d.data.logs){
+      d.data.logs.forEach(l => log(l));
+    }
+
+    if(d.data && d.data.zip_id){
+      const zipUrl = "/api/zip/" + d.data.zip_id;
+
+      log("⬇ 正在调用浏览器下载整理好的视频包…");
+
+      const a = document.createElement("a");
+      a.href = zipUrl;
+      a.download = "";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      log("✔ 下载任务已完成，服务器将自动清理文件");
+    }else{
+      log("⚠ 未获取到下载文件");
+    }
+
+    restoreButton();
+  })
+  .catch(e => {
+    log("❌ 请求异常：" + e.message);
+    restoreButton();
+  });
+
+  // 恢复按钮函数
+  function restoreButton(){
+    btn.disabled = false;
+    btn.innerText = "开始下载";
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+  }
+}
+
+/* ========== 获取邀请码逻辑 ========== */
+function getInviteCode() {
+  log("🔍 正在获取邀请码...");
+  fetch("/api/get_invite_code", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.code !== 200) {
+      log(`❌ 获取邀请码失败：${d.msg}`);
+      return;
+    }
+    document.getElementById("inputContent").value = d.data.invite_code;
+    log(`✔ 邀请码获取成功，已填入输入框`);
+  })
+  .catch(e => {
+    log(`❌ 获取邀请码异常：${e.message}`);
+  });
+}
+</script>
+
+</body>
+</html>
